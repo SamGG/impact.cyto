@@ -1,0 +1,21 @@
+Package: impact.cyto
+Type: Package
+Title: Integrative MultiPArametriC Tools for CYTOmetry
+Version: 0.1.0
+Author: Version: 0.1
+Authors@R: personList(
+    person("Samuel", "Granjeaud", email = "samuel.granjeaud@inserm.fr",
+                  role = c("aut", "cre")),
+    person("Anne-Sophie","Chretien", role = "ctb"),
+    person("Francoise","Gondois-Rey", role = "ctb"))
+Maintainer: Samuel Granjeaud <samuel.granjeaud@inserm.fr>
+Description: Contains some functions useful for cytometry data
+	analysis.
+License: GPL (>=2)
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 3.4.0)
+Imports:
+    flowCore
+URL: http://impact-cyto.inserm.fr, https://github.com/impact.cyto
+RoxygenNote: 6.1.0
