@@ -1,11 +1,11 @@
 impact.cyto
 ===========
 
-Integrative MultiPArametriC Tools for CYTOmetry
+**I**ntegrative **M**ulti**Pa**rametric **C**ytometry **T**ools
 
 Current Goals
 =============
-* Import NAVIOS LMD/FCS files
+* ...
 
 Web Sites
 =============
