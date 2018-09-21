@@ -5,7 +5,7 @@
 \title{Convert Navios file to FCS}
 \usage{
 convert.navios.FCS(files = NULL, raw_dir = ".", pattern = NULL,
-  fcs_dir, keep_range = TRUE, verbose = 2)
+  fcs_dir, keep_range = 10000, verbose = 2)
 }
 \arguments{
 \item{files}{optional character vector with filenames.}
@@ -16,9 +16,10 @@ convert.navios.FCS(files = NULL, raw_dir = ".", pattern = NULL,
 
 \item{fcs_dir}{a directory name where FCS files are stored.}
 
-\item{keep_range}{logical, TRUE by default. If TRUE, the ranges of the
-resulting FCS are scaled to equal to the linear ranges of the first segment
-using the $PxE keywords. If FALSE, no range is scaled.}
+\item{keep_range}{If string "FCS2", use the range of the FCS2 segment that
+is the ranges of the resulting FCS are scaled to equal to the linear ranges
+of the first segment using the $PxE keywords. If FALSE, no range is scaled.
+If a positive numerical value, all ranges will be set to that value.}
 
 \item{verbose}{integer, verbosity, 0 being minimal.}
 }

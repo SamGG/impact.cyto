@@ -11,9 +11,10 @@
 #' @param raw_dir       directory where to look for the files.
 #' @param pattern       this argument is passed on to \code{dir}, see details.
 #' @param fcs_dir       a directory name where FCS files are stored.
-#' @param keep_range    logical, TRUE by default. If TRUE, the ranges of the
-#'   resulting FCS are scaled to equal to the linear ranges of the first segment
-#'   using the $PxE keywords. If FALSE, no range is scaled.
+#' @param keep_range    If string "FCS2", use the range of the FCS2 segment that
+#'   is the ranges of the resulting FCS are scaled to equal to the linear ranges
+#'   of the first segment using the $PxE keywords. If FALSE, no range is scaled.
+#'   If a positive numerical value, all ranges will be set to that value.
 #' @param verbose       integer, verbosity, 0 being minimal.
 #'
 #' @return Nothing, but reports every steps of processing.
@@ -31,7 +32,7 @@
 #'
 #' @export
 convert.navios.FCS <- function(files=NULL, raw_dir=".", pattern=NULL,
-                               fcs_dir, keep_range = TRUE, verbose = 2)
+                               fcs_dir, keep_range = 10000, verbose = 2)
 {
   if (is.null(files)) {
     files <- dir(raw_dir, pattern, full.names = TRUE)
@@ -116,11 +117,10 @@ convert.navios.FCS <- function(files=NULL, raw_dir=".", pattern=NULL,
     for (i in seq(nrow(pd.mrg))) {
       pd2[pd2$id == pd.mrg$id[i], "desc"] = pd.mrg[i, "desc.y"]
     }
-    # change range according 1st segment (checked vs FlowJo 10.4.2)
-    if (keep_range) {
+    # change range according 1st segment
+    if (is.character(keep_range) && keep_range == "FCS2") {
       if (verbose > 1) cat("Scaling ranges\n")
       gain = rep(1, ncol(ff))
-      rang = NULL
       for (i in seq(nrow(pd.mrg))) {
         # range from 1st segment
         range1st = pd.mrg$linRange[i]
@@ -134,15 +134,38 @@ convert.navios.FCS <- function(files=NULL, raw_dir=".", pattern=NULL,
         pd2$range[j] = range1st
         pd2$maxRange[j] = range1st - 1
         names(range1st) = paste0(rownames(pd2)[j], "R")
-        rang = c(rang, range1st)
-        names(rang)[]
         keyword(ff) = as.list(range1st)
       }
       exprs(ff) = sweep(exprs(ff), 2, gain, "*")
       # change datatype
       keyword(ff) = list("$DATATYPE" = "F")
+    } else if (is.numeric(keep_range) && keep_range >= 0) {
+      #  as FlowJo 10.4.2, keep_range = 10000
+      if (verbose > 1) cat("Scaling ranges\n")
+      gain = rep(1, ncol(ff))
+      for (i in seq(nrow(pd.mrg))) {
+        # range from 1st segment
+        range1st = pd.mrg$linRange[i]
+        if (range1st == 0) next()
+        range1st = keep_range
+        # corresponding channel and range
+        j = which(pd2$id == pd.mrg$id[i])
+        range2nd = pd2$range[j]
+        # gain factor to match true range
+        gain[j] = (range1st-1) / (range2nd-1)
+        # update range
+        pd2$range[j] = range1st
+        pd2$maxRange[j] = range1st - 1
+        names(range1st) = paste0(rownames(pd2)[j], "R")
+        keyword(ff) = as.list(range1st)
+      }
+      exprs(ff) = sweep(exprs(ff), 2, gain, "*")
+      # change datatype
+      keyword(ff) = list("$DATATYPE" = "F")
+    } else {
+      warning(sprintf("Unhandled keep_range value\"%s\"", as.character(keep_range)))
     }
-      # normalize F/S channel names
+    # normalize F/S channel names
     ids = grep("^[FS]S-", pd2$name)
     if (length(ids)) {
       pd2$name = gsub("(^[FS]S)-", "\\1C-", pd2$name)
