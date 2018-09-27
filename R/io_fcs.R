@@ -107,9 +107,19 @@ convert.navios.FCS <- function(files=NULL, raw_dir=".", pattern=NULL,
       cat("Parameters of 2nd segment\n")
       print(pd2)
     }
+
+    # transform and match -------------------------
+    # change name to standard -AHW
+    pd1$name = gsub(" LOG", "", pd1$name)
+    pd1$name = gsub(" LIN", "", pd1$name)
+    pd1$name = gsub(" INT", "-A", pd1$name)
+    pd1$name = gsub(" PEAK", "-H", pd1$name)
+    pd1$name = gsub(" TOF", "-W", pd1$name)
     # match channels by name between two segments
-    pd2$id = gsub("(FL\\d+).+", "\\1", pd2$name, perl = TRUE)
-    pd1$id = gsub("(FL\\d+).+", "\\1", pd1$name, perl = TRUE)
+    pd2$id = pd2$name
+    pd1$id = pd1$name
+    stopifnot(all(!duplicated(pd1$id)))
+    stopifnot(all(!duplicated(pd2$id)))
     pd.mrg = merge(pd2[, c("id", "name", "desc")],
                    pd1[, c("id", "name", "desc", "linRange")],
                    by = "id", sort = FALSE, stringsAsFactors = FALSE)
